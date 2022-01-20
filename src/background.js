@@ -14,7 +14,6 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
-
 async function createWindow() {
   const win = new BrowserWindow({
     width: 1400,
@@ -77,3 +76,23 @@ electron.ipcMain.handle('open-single-file-and-play', async (event, path) => {
   console.log(path)
   event.sender.send('play-data', { data: dataurl.convert({ data: fs.readFileSync(path), mimetype: "audio/mp3"}) })
 })
+
+electron.ipcMain.handle('scan-folder-and-add', async (event, path) => {
+  console.log(path.filePaths);
+  path.filePaths.forEach((pathString) => {
+    console.log(pathString);
+    if (fs.statSync(pathString).isDirectory()){
+      recursiveAddFolder(pathString)
+    } else {
+      addFile(pathString)
+    }
+  })
+})
+
+function recursiveAddFolder(path) {
+
+}
+
+function addFile(path) {
+
+}

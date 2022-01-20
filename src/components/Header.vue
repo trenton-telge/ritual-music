@@ -7,7 +7,7 @@
       <input type="text" class="search-bar" placeholder="Search">
     </div>
     <div class="header-group-right">
-      <i class="fas fa-plus-square" v-on:click="openFile"></i>
+      <i class="fas fa-plus-square" v-on:click="addFiles"></i>
       <i class="fas fa-cog"></i>
     </div>
   </div>
@@ -19,9 +19,8 @@ import { ipcRenderer } from 'electron';
 export default {
   name: "Header",
   methods: {
-    openFile: function () {
-      const { dialog } = require('electron').remote;
-      dialog.showOpenDialog({ properties: ['openFile'] }).then((result) => ipcRenderer.invoke('open-single-file-and-play', result))
+    addFiles: function () {
+      this.$emit('addfiles');
     }
   },
   computed: {
@@ -45,6 +44,7 @@ export default {
     max-width: 100vw;
     min-width: 100vw;
     min-height: 80px;
+    max-height: 8vh;
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
     justify-content: space-between;
     align-items: center;
