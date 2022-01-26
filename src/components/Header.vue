@@ -11,28 +11,15 @@
       <i class="fas fa-cog"></i>
     </div>
   </div>
-  <audio ref="player" :src="audioSource" autoplay></audio>
 </template>
 
 <script>
-import { ipcRenderer } from 'electron';
 export default {
   name: "Header",
   methods: {
     addFiles: function () {
       this.$emit('addfiles');
     }
-  },
-  computed: {
-    audioSource: ""
-  },
-  mounted: function () {
-    this.$nextTick(function () {
-      ipcRenderer.on('play-data', function (evt, message) {
-        console.log(message.data);
-        new Audio(message.data).play();
-      });
-    });
   }
 }
 </script>

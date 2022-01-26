@@ -19,6 +19,11 @@ export default {
     Library,
     Controls
   },
+  data() {
+    return {
+
+    }
+  },
   methods: {
     addFiles: function () {
       const { dialog } = require('electron').remote;
@@ -28,6 +33,17 @@ export default {
       const { dialog } = require('electron').remote;
       dialog.showOpenDialog({ properties: ["openFile", "dontAddToRecent"] }).then((result) => ipcRenderer.invoke('open-single-file-and-play', result))
     },
+  },
+  mounted: function () {
+    this.$nextTick(function () {
+      ipcRenderer.on('play-data', function (evt, message) {
+        console.log(message.data);
+        new Audio(message.data).play();
+      });
+      ipcRenderer.on('refresh-albums', function (evt, message) {
+
+      });
+    });
   }
 }
 </script>
