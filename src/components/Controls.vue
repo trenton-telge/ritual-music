@@ -2,10 +2,10 @@
   <div class="audio-controls">
     <div class="controls-left">
       <div class="song-details">
-        <img v-if="isPlaying" id="cover-art" :src="coverArt" alt="Now Playing" />
+        <img v-if="isPlaying" id="cover-art" :src="metadata.coverArt" alt="Now Playing" />
         <div v-if="isPlaying" class="text-details">
-          <p>{{songTitle}}</p>
-          <p><span v-on:click="goToArtist(artist)">{{artist}}</span> - <span v-on:click="goToAlbum(album, albumArtist)">{{album}}</span></p>
+          <p>{{metadata.title}}</p>
+          <p><span v-on:click="goToArtist(metadata.artist)">{{metadata.artist}}</span> - <span v-on:click="goToAlbum(metadata.album, metadata.albumArtist)">{{metadata.album}}</span></p>
         </div>
       </div>
     </div>
@@ -20,8 +20,8 @@
       <i v-on:click="toggleShuffle" class="fas fa-random"></i>
     </div>
     <div class="controls-right">
-      <i class="fas fa-volume-down"></i>
-      <i class="fas fa-volume-up"></i>
+      <i v-on:click="volDown" class="fas fa-volume-down"></i>
+      <i v-on:click="volUp" class="fas fa-volume-up"></i>
     </div>
   </div>
 </template>
@@ -29,16 +29,13 @@
 <script>
 export default {
   name: "Controls",
+  props: ['metadata'],
   computed: {
   },
   data() {
     return {
       isPlaying: false,
       coverArt: "../assets/placeholder.png",
-      songTitle: "",
-      album: "",
-      artist: "",
-      albumArtist: ""
     }
   },
   methods: {
@@ -53,11 +50,17 @@ export default {
       this.isPlaying = true;
     },
     back: function() {},
-    next: function() {},
+    next: function() {
+      this.$emit('next-track');
+    },
     toggleRepeat: function() {},
     toggleShuffle: function() {},
-    volUp: function() {},
-    volDown: function() {},
+    volUp: function() {
+      this.$emit('vol-up');
+    },
+    volDown: function() {
+      this.$emit('vol-down');
+    },
     goToAlbum: function(album, albumArtist) {
       this.$emit('go-to-album', {title: album, albumArtist: albumArtist});
     },
@@ -108,7 +111,21 @@ export default {
 #cover-art {
   min-height: 100%;
   max-height: 100%;
-  height: 100%;
+  height: 12vh;
   background-color: #2c3e50;
+}
+.fas {
+  font-size: 24pt;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: transparent;
+  margin: 2px;
+  transition: background-color .3s;
+}
+.fas:hover {
+  background-color: lightgrey;
+}
+.fas:active {
+  background-color: darkgray;
 }
 </style>

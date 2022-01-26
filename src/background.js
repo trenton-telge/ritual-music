@@ -41,8 +41,8 @@ function Album(title, albumArtist, coverArt) {
 
 async function createWindow() {
   const win = new BrowserWindow({
-    width: 1400,
-    height: 900,
+    width: 2600,
+    height: 1200,
     webPreferences: {
 
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
@@ -127,11 +127,24 @@ electron.ipcMain.handle('get-album-list', async (event) => {
   })
 })
 
+electron.ipcMain.handle('play-next-if-available', async (event) => {
+  activePlaylist.shift();
+  if (activePlaylist.length > 0) {
+    playInApp(event, activePlaylist[0]);
+  }
+})
+
 function addAlbumToPlaylistAndPlay(event, album) {
   getSongsByAlbum(album).then((res) => {
     activePlaylist = res.concat(activePlaylist);
-    console.log(activePlaylist[0])
-    event.sender.send('play-data', {data: dataurl.convert({data: fs.readFileSync(activePlaylist[0].filepath), mimetype: activePlaylist[0].mimetype}), metadata: activePlaylist[0]})
+    playInApp(event, activePlaylist[0]);
+  })
+}
+
+function playInApp(event, song) {
+  getAlbumArt(song.album, song.artist).then((res) => {
+    song.coverArt = res;
+    event.sender.send('play-data', {data: dataurl.convert({data: fs.readFileSync(song.filepath), mimetype: song.mimetype}), metadata: song})
   })
 }
 
@@ -178,6 +191,16 @@ function getSongsByAlbum(album){
   }))
 }
 
+function getAlbumArt(title, artist) {
+  return new Promise((resolve) => {
+    datastore.find({type: "album", title: title, albumArtist: artist}).then((res) => {
+      if (res.length > 0) {
+        resolve(res[0].coverArt);
+      }
+    })
+  })
+}
+
 function addFile(path) {
   return new Promise((resolve) => {
     let isMusicFile = false;
@@ -205,7 +228,10 @@ function addFile(path) {
       if (songObject.albumartist === undefined || songObject.albumartist === "") {
         songObject.albumartist = songObject.artist;
       }
-      console.log(songObject)
+      if (songObject.trackNumber.includes('/')){
+        songObject.trackNumber = parseInt(songObject.trackNumber.substr(0, songObject.trackNumber.indexOf('/')));
+      }
+      //console.log(songObject)
       datastore.find({type: "song", title: songObject.title, artist: songObject.artist, album: songObject.album}).then((res) => {
         if (res.length > 0) {
           console.log("Song exists.")

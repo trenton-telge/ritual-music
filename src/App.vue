@@ -5,7 +5,7 @@
     </audio>
     <Header @addfiles="addFiles" />
     <Library :albums="albums" @play-album="playAlbum" />
-    <Controls/>
+    <Controls :metadata="metadata" @next-track="playNextIfAvailable" @vol-up="volumeUp" @vol-down="volumeDown"/>
   </div>
 </template>
 
@@ -25,6 +25,7 @@ export default {
   data() {
     return {
       audioData: "",
+      metadata: undefined,
       albums: [{title: "titlehere", albumartist: "albumartisthere"}]
     }
   },
@@ -45,15 +46,30 @@ export default {
       console.log(this.albums);
     },
     playAlbum: function(album) {
-      ipcRenderer.invoke('add-album-to-front-of-playlist-and-play', JSON.stringify(album))
+      ipcRenderer.invoke('add-album-to-front-of-playlist-and-play', JSON.stringify(album));
+    },
+    volumeUp: function () {
+      console.log('up')
+      let currentVolume = document.getElementById('player').volume
+      if (currentVolume + .05 < 0) {document.getElementById('player').volume = currentVolume + .05;}
+    },
+    volumeDown: function () {
+      console.log('down')
+      let currentVolume = document.getElementById('player').volume
+      if (currentVolume - .05 >= 0) {document.getElementById('player').volume = currentVolume - .05;}
+    },
+    playNextIfAvailable: function() {
+      ipcRenderer.invoke('play-next-if-available');
     }
   },
   mounted: function () {
     this.$nextTick(function () {
+      let vm = this;
       this.refreshAlbums();
-      ipcRenderer.on('play-data', async function (evt, message) {
-        //console.log(message.data);
-        //new Audio(message.data).play();
+      document.getElementById('player').addEventListener('ended', function(){
+        vm.playNextIfAvailable();
+      });
+      ipcRenderer.on('play-data', function (evt, message) {
         const player = document.getElementById('player');
         const source = document.getElementById('source');
         player.pause();
@@ -63,6 +79,7 @@ export default {
           player.load();
           player.play().then(() => {});
         })
+        vm.metadata = message.metadata;
       });
       new Promise((resolve => {
         ipcRenderer.on('refresh-albums', function (evt, message) {
