@@ -2,7 +2,7 @@
   <div class="library">
     <div class="albums">
       <div v-for="(album) in albums" :key="album._id" class="album-card">
-        <img src="../assets/placeholder.png" :alt="album.title">
+        <img :src="album.coverArt || '../assets/placeholder.png'" :alt="album.title">
         <p>{{album.title}}</p>
         <p>{{album.albumArtist}}</p>
       </div>
@@ -36,5 +36,9 @@ export default {
 .album-card {
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
   margin: 6px;
+  max-width: 260px;
+}
+.album-card img {
+  max-width: 260px;
 }
 </style>

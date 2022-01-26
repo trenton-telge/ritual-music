@@ -17,6 +17,7 @@
   "dependencies": {
     "@electron/remote": "^2.0.1",
     "async": "^3.2.3",
+    "buffer-to-data-url": "^1.0.0",
     "core-js": "^3.6.5",
     "dataurl": "^0.1.0",
     "electron-store": "^8.0.1",

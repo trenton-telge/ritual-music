@@ -5,6 +5,7 @@ import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, {VUEJS3_DEVTOOLS} from 'electron-devtools-installer'
 import dataurl from "dataurl";
 import fs, {realpathSync} from "fs";
+import bufferToDataUrl from "buffer-to-data-url";
 /*const Store = require('electron-store');
 const store = new Store();*/
 const Datastore = require('nedb-promises')
@@ -179,7 +180,7 @@ function addFile(path) {
     }
     if (isMusicFile) {
       const tags = NodeID3.read(path);
-      console.log(tags.raw.APIC);
+      //console.log(tags.raw);
       let songObject = new Song(tags.title, path, tags.artist, tags.album, tags.raw.TPE2, undefined, tags.trackNumber, mime)
       if (songObject.albumartist === undefined || songObject.albumartist === "") {
         songObject.albumartist = songObject.artist;
@@ -193,7 +194,7 @@ function addFile(path) {
           datastore.insert(songObject).then(() => {
             console.log(`Inserted (${songObject.title}) by (${songObject.artist}) on (${songObject.album})`);
 
-            addAlbumIfNotExists(new Album(songObject.album, songObject.albumartist, undefined)).then(() => {
+            addAlbumIfNotExists(new Album(songObject.album, songObject.albumartist, bufferToDataUrl(tags.raw.APIC.mime, tags.raw.APIC.imageBuffer))).then(() => {
               resolve();
             })
           })
