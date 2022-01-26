@@ -15,6 +15,8 @@ const NodeID3 = require('node-id3');
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+let activePlaylist = [];
+
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
@@ -25,7 +27,7 @@ function Song(title, filePath, artist, album, albumArtist, cover, trackNumber, m
   this.filepath = filePath;
   this.artist = artist;
   this.album = album;
-  this.albumartist = albumArtist;
+  this.albumArtist = albumArtist;
   this.trackNumber = trackNumber;
   this.mimetype = mimeType;
 }
@@ -100,6 +102,10 @@ electron.ipcMain.handle('open-single-file-and-play', async (event, path) => {
   event.sender.send('play-data', { data: dataurl.convert({ data: fs.readFileSync(path), mimetype: "audio/mp3"}) })
 })
 
+electron.ipcMain.handle('add-album-to-front-of-playlist-and-play', (event, album) => {
+  addAlbumToPlaylistAndPlay(event, JSON.parse(album));
+})
+
 electron.ipcMain.handle('scan-folder-and-add', async (event, path) => {
   new Promise(() => {
     console.log(path.filePaths);
@@ -120,6 +126,14 @@ electron.ipcMain.handle('get-album-list', async (event) => {
     event.sender.send('refresh-albums', res);
   })
 })
+
+function addAlbumToPlaylistAndPlay(event, album) {
+  getSongsByAlbum(album).then((res) => {
+    activePlaylist = res.concat(activePlaylist);
+    console.log(activePlaylist[0])
+    event.sender.send('play-data', {data: dataurl.convert({data: fs.readFileSync(activePlaylist[0].filepath), mimetype: activePlaylist[0].mimetype}), metadata: activePlaylist[0]})
+  })
+}
 
 function recursiveAddFolder(parentFolderPath, index = 0) {
   fs.readdir(parentFolderPath, async (err, files) => {
@@ -155,6 +169,12 @@ async function getAllSongs() {
 function getAllAlbums() {
   return new Promise((resolve => {
     datastore.find({type: "album"}).then((res) => {resolve(res);});
+  }))
+}
+
+function getSongsByAlbum(album){
+  return new Promise((resolve => {
+    datastore.find({type: "song", album: album.title, albumArtist: album.albumArtist}).then((res) => {resolve(res.sort((a, b) => (a.trackNumber > b.trackNumber) ? 1 : -1));})
   }))
 }
 
@@ -206,6 +226,7 @@ function addFile(path) {
     }
   })
 }
+
 function addAlbumIfNotExists(album) {
   return new Promise((resolve) => {
     datastore.find({type: "album", title: album.title, albumArtist: album.albumArtist}).then((res) => {

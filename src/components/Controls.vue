@@ -5,19 +5,19 @@
         <img v-if="isPlaying" id="cover-art" :src="coverArt" alt="Now Playing" />
         <div v-if="isPlaying" class="text-details">
           <p>{{songTitle}}</p>
-          <p>{{artist}} - {{album}}</p>
+          <p><span v-on:click="goToArtist(artist)">{{artist}}</span> - <span v-on:click="goToAlbum(album, albumArtist)">{{album}}</span></p>
         </div>
       </div>
     </div>
     <div class="controls-center">
-      <i class="fas fa-retweet"></i>
-      <i class="fas fa-step-backward"></i>
+      <i v-on:click="toggleRepeat" class="fas fa-retweet"></i>
+      <i v-on:click="back" class="fas fa-step-backward"></i>
       <span>
         <i v-if="isPlaying" v-on:click="pause" class="fas fa-pause"></i>
-        <i v-else class="fas fa-play"></i>
+        <i v-else v-on:click="play" class="fas fa-play"></i>
       </span>
-      <i class="fas fa-step-forward"></i>
-      <i class="fas fa-random"></i>
+      <i v-on:click="next" class="fas fa-step-forward"></i>
+      <i v-on:click="toggleShuffle" class="fas fa-random"></i>
     </div>
     <div class="controls-right">
       <i class="fas fa-volume-down"></i>
@@ -30,16 +30,39 @@
 export default {
   name: "Controls",
   computed: {
-    isPlaying: false,
-    coverArt: "../assets/placeholder.png",
-    songTitle: "",
-    album: "",
-    artist: ""
+  },
+  data() {
+    return {
+      isPlaying: false,
+      coverArt: "../assets/placeholder.png",
+      songTitle: "",
+      album: "",
+      artist: "",
+      albumArtist: ""
+    }
   },
   methods: {
-    pause: () => {
-      console.log("Paused")
+    pause: function() {
+      console.log("Paused");
       this.$emit('pause');
+      this.isPlaying = false;
+    },
+    play: function() {
+      console.log("Playback resumed");
+      this.$emit('play');
+      this.isPlaying = true;
+    },
+    back: function() {},
+    next: function() {},
+    toggleRepeat: function() {},
+    toggleShuffle: function() {},
+    volUp: function() {},
+    volDown: function() {},
+    goToAlbum: function(album, albumArtist) {
+      this.$emit('go-to-album', {title: album, albumArtist: albumArtist});
+    },
+    goToArtist: function(artist) {
+      this.$emit('go-to-artist', {artist: artist});
     }
   },
   mounted: function() {

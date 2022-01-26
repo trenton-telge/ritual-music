@@ -2,7 +2,7 @@
   <div class="library">
     <div class="albums">
       <div v-for="(album) in albums" :key="album._id" class="album-card">
-        <img :src="album.coverArt || '../assets/placeholder.png'" :alt="album.title">
+        <img :src="album.coverArt || '../assets/placeholder.png'" v-on:click="playAlbum(album)" :alt="album.title">
         <p>{{album.title}}</p>
         <p>{{album.albumArtist}}</p>
       </div>
@@ -13,7 +13,13 @@
 <script>
 export default {
   name: 'Library',
-  props: ['albums']
+  props: ['albums'],
+  methods: {
+    playAlbum: function(album) {
+      console.log(`Clicked play on album ${album.title} by ${album.albumArtist}`);
+      this.$emit('play-album', album)
+    }
+  }
 }
 </script>
 

@@ -1,7 +1,10 @@
 <template>
   <div id="content">
+    <audio id="player">
+      <source id="source" :src="audioData"/>
+    </audio>
     <Header @addfiles="addFiles" />
-    <Library :albums="albums" />
+    <Library :albums="albums" @play-album="playAlbum" />
     <Controls/>
   </div>
 </template>
@@ -21,6 +24,7 @@ export default {
   },
   data() {
     return {
+      audioData: "",
       albums: [{title: "titlehere", albumartist: "albumartisthere"}]
     }
   },
@@ -39,14 +43,26 @@ export default {
     setAlbumArray: function(albums) {
       this.albums = albums;
       console.log(this.albums);
+    },
+    playAlbum: function(album) {
+      ipcRenderer.invoke('add-album-to-front-of-playlist-and-play', JSON.stringify(album))
     }
   },
   mounted: function () {
     this.$nextTick(function () {
       this.refreshAlbums();
-      ipcRenderer.on('play-data', function (evt, message) {
-        console.log(message.data);
-        new Audio(message.data).play();
+      ipcRenderer.on('play-data', async function (evt, message) {
+        //console.log(message.data);
+        //new Audio(message.data).play();
+        const player = document.getElementById('player');
+        const source = document.getElementById('source');
+        player.pause();
+        new Promise((resolve => {
+          source.setAttribute('src', message.data); resolve();
+        })).then(() => {
+          player.load();
+          player.play().then(() => {});
+        })
       });
       new Promise((resolve => {
         ipcRenderer.on('refresh-albums', function (evt, message) {
@@ -82,5 +98,8 @@ audio {
   flex-wrap: wrap;
   align-items: stretch;
   align-content: space-between;
+}
+#player {
+  display: none;
 }
 </style>
