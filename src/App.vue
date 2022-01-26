@@ -1,27 +1,27 @@
 <template>
   <div id="content">
     <Header @addfiles="addFiles" />
-    <Library/>
+    <Library :albums="albums" />
     <Controls/>
   </div>
 </template>
 
 <script>
-import Library from './components/Library.vue'
 import Header from "@/components/Header";
 import Controls from "@/components/Controls";
 import {ipcRenderer} from "electron";
+import Library from "@/components/Library";
 
 export default {
   name: 'App',
   components: {
-    Header,
     Library,
+    Header,
     Controls
   },
   data() {
     return {
-
+      albums: [{title: "titlehere", albumartist: "albumartisthere"}]
     }
   },
   methods: {
@@ -33,16 +33,26 @@ export default {
       const { dialog } = require('electron').remote;
       dialog.showOpenDialog({ properties: ["openFile", "dontAddToRecent"] }).then((result) => ipcRenderer.invoke('open-single-file-and-play', result))
     },
+    refreshAlbums: function() {
+      ipcRenderer.invoke('get-album-list');
+    },
+    setAlbumArray: function(albums) {
+      this.albums = albums;
+      console.log(this.albums);
+    }
   },
   mounted: function () {
     this.$nextTick(function () {
+      this.refreshAlbums();
       ipcRenderer.on('play-data', function (evt, message) {
         console.log(message.data);
         new Audio(message.data).play();
       });
-      ipcRenderer.on('refresh-albums', function (evt, message) {
-
-      });
+      new Promise((resolve => {
+        ipcRenderer.on('refresh-albums', function (evt, message) {
+          resolve(message);
+        });
+      })).then((message)=> {this.setAlbumArray(message);});
     });
   }
 }

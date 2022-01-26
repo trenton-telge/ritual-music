@@ -64,7 +64,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  if (BrowserWindow.getAllWindows().length === 0) createWindow().then(() => {})
 })
 
 app.on('ready', async () => {
@@ -100,20 +100,22 @@ electron.ipcMain.handle('open-single-file-and-play', async (event, path) => {
 })
 
 electron.ipcMain.handle('scan-folder-and-add', async (event, path) => {
-  console.log(path.filePaths);
-  path.filePaths.forEach((pathString) => {
-    console.log(pathString);
-    if (fs.statSync(pathString).isDirectory()){
-      recursiveAddFolder(pathString)
-    } else {
-      addFile(pathString)
-    }
-  })
+  new Promise(() => {
+    console.log(path.filePaths);
+    path.filePaths.forEach((pathString) => {
+      console.log(pathString);
+      if (fs.statSync(pathString).isDirectory()){
+        recursiveAddFolder(pathString)
+      } else {
+        addFile(pathString)
+      }
+    })
+  }).then()
 })
 
 electron.ipcMain.handle('get-album-list', async (event) => {
   console.log("Getting album list...");
-  await getAllAlbums().then((res) => {
+  getAllAlbums().then((res) => {
     event.sender.send('refresh-albums', res);
   })
 })
@@ -122,7 +124,7 @@ function recursiveAddFolder(parentFolderPath, index = 0) {
   fs.readdir(parentFolderPath, async (err, files) => {
     if (index < files.length) {
       let pathString = files[index];
-      parsePath(parentFolderPath, pathString).then((res) => {recursiveAddFolder(parentFolderPath, index + 1)})
+      parsePath(parentFolderPath, pathString).then(() => {recursiveAddFolder(parentFolderPath, index + 1)})
     }
   })
 }
@@ -137,7 +139,7 @@ function parsePath(path, pathString) {
       resolve()
     } else {
       console.log("Determined to be a file.")
-      addFile(pathString).then ((res) => {
+      addFile(pathString).then (() => {
         console.log("File processed.");
         resolve()
       })
@@ -178,6 +180,9 @@ function addFile(path) {
     if (isMusicFile) {
       const tags = NodeID3.read(path);
       let songObject = new Song(tags.title, path, tags.artist, tags.album, tags.raw.TPE2, undefined, tags.trackNumber, mime)
+      if (songObject.albumartist === undefined || songObject.albumartist === "") {
+        songObject.albumartist = songObject.artist;
+      }
       console.log(songObject)
       datastore.find({type: "song", title: songObject.title, artist: songObject.artist, album: songObject.album}).then((res) => {
         if (res.length > 0) {
@@ -186,7 +191,7 @@ function addFile(path) {
         } else {
           datastore.insert(songObject).then(() => {
             console.log(`Inserted (${songObject.title}) by (${songObject.artist}) on (${songObject.album})`);
-            addAlbumIfNotExists(new Album(songObject.album, songObject.albumartist, undefined)).then((res) => {
+            addAlbumIfNotExists(new Album(songObject.album, songObject.albumartist, undefined)).then(() => {
               resolve();
             })
           })

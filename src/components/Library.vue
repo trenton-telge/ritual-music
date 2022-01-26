@@ -1,14 +1,18 @@
 <template>
   <div class="hello">
+    <div v-for="(album) in albums" :key="album._id">
+      <div>
+        <p>{{album.title}}</p>
+        <p>{{album.albumArtist}}</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
   name: 'Library',
-  props: {
-    msg: String
-  }
+  props: ['albums']
 }
 </script>
 
