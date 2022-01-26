@@ -31,7 +31,7 @@ export default {
   name: "Controls",
   computed: {
     isPlaying: false,
-    coverArt: "",
+    coverArt: "../assets/placeholder.png",
     songTitle: "",
     album: "",
     artist: ""

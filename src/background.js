@@ -179,6 +179,7 @@ function addFile(path) {
     }
     if (isMusicFile) {
       const tags = NodeID3.read(path);
+      console.log(tags.raw.APIC);
       let songObject = new Song(tags.title, path, tags.artist, tags.album, tags.raw.TPE2, undefined, tags.trackNumber, mime)
       if (songObject.albumartist === undefined || songObject.albumartist === "") {
         songObject.albumartist = songObject.artist;
@@ -191,6 +192,7 @@ function addFile(path) {
         } else {
           datastore.insert(songObject).then(() => {
             console.log(`Inserted (${songObject.title}) by (${songObject.artist}) on (${songObject.album})`);
+
             addAlbumIfNotExists(new Album(songObject.album, songObject.albumartist, undefined)).then(() => {
               resolve();
             })
