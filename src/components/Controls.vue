@@ -4,8 +4,8 @@
       <div class="song-details">
         <img v-if="isPlaying" id="cover-art" :src="metadata.coverArt" alt="Now Playing" />
         <div v-if="isPlaying" class="text-details">
-          <p>{{metadata.title}}</p>
-          <p><span v-on:click="goToArtist(metadata.artist)">{{metadata.artist}}</span> - <span v-on:click="goToAlbum(metadata.album, metadata.albumArtist)">{{metadata.album}}</span></p>
+          <p class="song-title">{{metadata.title}}</p>
+          <p class="song-details"><span v-on:click="goToArtist(metadata.artist)">{{metadata.artist}}</span>&nbsp;-&nbsp;<span v-on:click="goToAlbum(metadata.album, metadata.albumArtist)">{{metadata.album}}</span></p>
         </div>
       </div>
     </div>
@@ -127,5 +127,24 @@ export default {
 }
 .fas:active {
   background-color: darkgray;
+}
+.fa-volume-up {
+  margin-right: 30px;
+}
+.text-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 10px;
+}
+.text-details p {
+  margin: 0;
+}
+.song-title {
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-weight: bold;
+}
+.song-details {
+  font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 </style>

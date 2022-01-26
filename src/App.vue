@@ -5,7 +5,7 @@
     </audio>
     <Header @addfiles="addFiles" />
     <Library :albums="albums" @play-album="playAlbum" />
-    <Controls :metadata="metadata" @next-track="playNextIfAvailable" @vol-up="volumeUp" @vol-down="volumeDown"/>
+    <Controls :metadata="metadata" @play="resumePlayback" @pause="pausePlayback" @next-track="playNextIfAvailable" @vol-up="volumeUp" @vol-down="volumeDown"/>
   </div>
 </template>
 
@@ -37,6 +37,12 @@ export default {
     playFile: function () {
       const { dialog } = require('electron').remote;
       dialog.showOpenDialog({ properties: ["openFile", "dontAddToRecent"] }).then((result) => ipcRenderer.invoke('open-single-file-and-play', result))
+    },
+    resumePlayback: function () {
+      document.getElementById('player').play();
+    },
+    pausePlayback: function () {
+      document.getElementById('player').pause();
     },
     refreshAlbums: function() {
       ipcRenderer.invoke('get-album-list');

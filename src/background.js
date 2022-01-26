@@ -225,8 +225,8 @@ function addFile(path) {
       const tags = NodeID3.read(path);
       //console.log(tags.raw);
       let songObject = new Song(tags.title, path, tags.artist, tags.album, tags.raw.TPE2, undefined, tags.trackNumber, mime)
-      if (songObject.albumartist === undefined || songObject.albumartist === "") {
-        songObject.albumartist = songObject.artist;
+      if (songObject.albumArtist === undefined || songObject.albumArtist === "") {
+        songObject.albumArtist = songObject.artist;
       }
       if (songObject.trackNumber.includes('/')){
         songObject.trackNumber = parseInt(songObject.trackNumber.substr(0, songObject.trackNumber.indexOf('/')));
@@ -239,8 +239,7 @@ function addFile(path) {
         } else {
           datastore.insert(songObject).then(() => {
             console.log(`Inserted (${songObject.title}) by (${songObject.artist}) on (${songObject.album})`);
-
-            addAlbumIfNotExists(new Album(songObject.album, songObject.albumartist, bufferToDataUrl(tags.raw.APIC.mime, tags.raw.APIC.imageBuffer))).then(() => {
+            addAlbumIfNotExists(new Album(songObject.album, songObject.albumArtist, (tags.raw.APIC !== undefined) ? bufferToDataUrl(tags.raw.APIC.mime, tags.raw.APIC.imageBuffer) : undefined)).then(() => {
               resolve();
             })
           })

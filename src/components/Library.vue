@@ -2,7 +2,8 @@
   <div class="library">
     <div class="albums">
       <div v-for="(album) in albums" :key="album._id" class="album-card">
-        <img :src="album.coverArt || '../assets/placeholder.png'" v-on:click="playAlbum(album)" :alt="album.title">
+        <img v-if="album.coverArt === undefined" v-on:click="playAlbum(album)" src="../assets/placeholder.png" />
+        <img v-else :src="album.coverArt" v-on:click="playAlbum(album)" :alt="album.title">
         <p>{{album.title}}</p>
         <p>{{album.albumArtist}}</p>
       </div>
