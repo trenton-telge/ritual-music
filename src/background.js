@@ -8,10 +8,14 @@ import fs, {realpathSync} from "fs";
 import bufferToDataUrl from "buffer-to-data-url";
 /*const Store = require('electron-store');
 const store = new Store();*/
-const Datastore = require('nedb-promises')
+// const Datastore = require('nedb-promises')
+import Datastore from 'nedb-promises';
 let datastore = Datastore.create({filename: './library.db', autoload: true});
 /** https://www.npmjs.com/package/node-id3 **/
-const NodeID3 = require('node-id3');
+import NodeID3 from "node-id3";
+// const NodeID3 = require('node-id3');
+//import FLAC from 'flac-parser';
+// const FLAC = require('flac-parser');
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
