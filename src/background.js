@@ -47,7 +47,9 @@ function Album(title, albumArtist, coverArt) {
 async function createWindow() {
   win = new BrowserWindow({
     width: 2600,
+    minWidth: 800,
     height: 1200,
+    minHeight: 800,
     webPreferences: {
 
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,

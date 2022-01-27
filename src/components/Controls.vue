@@ -96,7 +96,7 @@ export default {
 .controls-left, .controls-right {
   width: 20vw;
   min-width: 20vw;
-  max-width: 20vw;
+  flex: 1;
 }
 .controls-left {
   justify-content: flex-start;

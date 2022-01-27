@@ -57,7 +57,7 @@ export default {
     volumeUp: function () {
       console.log('up')
       let currentVolume = document.getElementById('player').volume
-      if (currentVolume + .05 < 0) {document.getElementById('player').volume = currentVolume + .05;}
+      if (currentVolume + .05 <= 1) {document.getElementById('player').volume = currentVolume + .05;}
     },
     volumeDown: function () {
       console.log('down')
