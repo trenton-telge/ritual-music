@@ -108,13 +108,6 @@ export default {
 audio {
   display: none;
 }
-#app {
-  font-family: Roboto, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
 #content {
   width: 100%;
   height: 100%;
@@ -125,6 +118,11 @@ audio {
   align-items: stretch;
   align-content: space-between;
   overflow-x: hidden;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
 }
 #player {
   display: none;

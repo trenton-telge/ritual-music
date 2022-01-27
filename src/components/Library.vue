@@ -49,6 +49,7 @@ export default {
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
   margin: 6px;
   max-width: 260px;
+  max-height: 360px;
 }
 .album-card img {
   max-width: 260px;
