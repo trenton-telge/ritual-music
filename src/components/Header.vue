@@ -27,11 +27,12 @@ export default {
 <style scoped>
   .header-wrapper {
     display: flex;
+    position: relative;
+    z-index: 20;
     width: 100vw;
     max-width: 100vw;
     min-width: 100vw;
-    min-height: 80px;
-    max-height: 8vh;
+    height: 80px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
     justify-content: space-between;
     align-items: center;

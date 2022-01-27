@@ -13,7 +13,7 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },
-  "main": "background.js",
+  "main": "src/background.js",
   "dependencies": {
     "@electron/remote": "^2.0.1",
     "async": "^3.2.3",
@@ -21,17 +21,11 @@
     "core-js": "^3.6.5",
     "dataurl": "^0.1.0",
     "electron-store": "^8.0.1",
-    "ffmpeg-static": "^4.4.1",
-    "fluent-ffmpeg": "^2.1.2",
     "fs": "0.0.1-security",
-    "howler": "^2.2.3",
     "mdue": "^0.1.4",
     "nedb-promises": "^5.0.3",
     "node-id3": "^0.2.3",
-    "node-wav": "^0.0.2",
-    "node-wav-player": "^0.2.0",
-    "vue": "^3.0.0",
-    "vue-material-icon": "^1.0.1"
+    "vue": "^3.0.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

@@ -28,17 +28,22 @@ export default {
 <style scoped>
 .library {
   flex: 1;
-  max-width: calc(100vw - 60px);
+  overflow-y: auto;
+  height: calc(100vh - 208px);
+  min-width: 100vw;
   width: 100vw;
   display: flex;
   flex-direction: row;
-  margin: 10px 30px;
+  padding: 20px;
 }
 .albums {
+  flex: 1;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   width: 100%;
   justify-content: center;
+  padding-bottom: 200px;
 }
 .album-card {
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);

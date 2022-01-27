@@ -87,6 +87,9 @@ export default {
         })
         vm.metadata = message.metadata;
       });
+      ipcRenderer.on('refresh-albums', function (evt, message) {
+        vm.setAlbumArray(message)
+      })
       new Promise((resolve => {
         ipcRenderer.on('refresh-albums', function (evt, message) {
           resolve(message);
@@ -121,6 +124,7 @@ audio {
   flex-wrap: wrap;
   align-items: stretch;
   align-content: space-between;
+  overflow-x: hidden;
 }
 #player {
   display: none;

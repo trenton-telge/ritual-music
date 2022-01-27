@@ -1,6 +1,6 @@
 'use strict'
 
-import electron, {app, BrowserWindow, protocol} from 'electron'
+import electron, {app, BrowserWindow, ipcRenderer, protocol} from 'electron'
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, {VUEJS3_DEVTOOLS} from 'electron-devtools-installer'
 import dataurl from "dataurl";
@@ -16,6 +16,7 @@ const NodeID3 = require('node-id3');
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 let activePlaylist = [];
+let win = undefined;
 
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
@@ -40,7 +41,7 @@ function Album(title, albumArtist, coverArt) {
 }
 
 async function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 2600,
     height: 1200,
     webPreferences: {
@@ -204,34 +205,22 @@ function getAlbumArt(title, artist) {
 function addFile(path) {
   return new Promise((resolve) => {
     let isMusicFile = false;
-    let mime = "";
+    let mime="";
+    let songObject;
     if (path.toLowerCase().endsWith(".mp3")) {
-      mime = "audio/mp3";
       isMusicFile = true;
-    }
-    if (path.toLowerCase().endsWith(".m4a")) {
-      isMusicFile = true;
-    }
-    if (path.toLowerCase().endsWith(".flac")) {
-      isMusicFile = true;
-    }
-    if (path.toLowerCase().endsWith(".wav")) {
-      isMusicFile = true;
-    }
-    if (path.toLowerCase().endsWith(".ogg")) {
-      isMusicFile = true;
-    }
-    if (isMusicFile) {
+      mime = "audio/mp3"
       const tags = NodeID3.read(path);
       //console.log(tags.raw);
-      let songObject = new Song(tags.title, path, tags.artist, tags.album, tags.raw.TPE2, undefined, tags.trackNumber, mime)
+      songObject = new Song(tags.title, path, tags.artist, tags.album, tags.raw.TPE2, undefined, tags.trackNumber, mime)
       if (songObject.albumArtist === undefined || songObject.albumArtist === "") {
         songObject.albumArtist = songObject.artist;
       }
-      if (songObject.trackNumber.includes('/')){
-        songObject.trackNumber = parseInt(songObject.trackNumber.substr(0, songObject.trackNumber.indexOf('/')));
+      if (songObject.trackNumber !== undefined) {
+        if (songObject.trackNumber.includes('/')) {
+          songObject.trackNumber = parseInt(songObject.trackNumber.substr(0, songObject.trackNumber.indexOf('/')));
+        }
       }
-      //console.log(songObject)
       datastore.find({type: "song", title: songObject.title, artist: songObject.artist, album: songObject.album}).then((res) => {
         if (res.length > 0) {
           console.log("Song exists.")
@@ -245,6 +234,23 @@ function addFile(path) {
           })
         }
       })
+    }
+    if (path.toLowerCase().endsWith(".m4a")) {
+      isMusicFile = true;
+      mime = "audio/mp4"
+    }
+    if (path.toLowerCase().endsWith(".flac")) {
+      isMusicFile = true;
+      mime = "audio/flac";
+    }
+    if (path.toLowerCase().endsWith(".wav")) {
+      isMusicFile = true;
+    }
+    if (path.toLowerCase().endsWith(".ogg")) {
+      isMusicFile = true;
+    }
+    if (isMusicFile) {
+      //console.log(songObject)
     } else {
       console.log("Not a music file.")
       resolve();
@@ -257,11 +263,16 @@ function addAlbumIfNotExists(album) {
     datastore.find({type: "album", title: album.title, albumArtist: album.albumArtist}).then((res) => {
       if (res.length > 0) {
         console.log("Album exists.")
+        resolve();
       } else {
         datastore.insert((album)).then(() => {
+          console.log(`Inserted album (${album.title}) by (${album.albumArtist})`)
+          getAllAlbums().then((res) => {
+            win.webContents.send('refresh-albums', res);
+            resolve();
+          })
         })
-        console.log("Album does not exist in db.")
       }
-    }).then(resolve)
+    })
   })
 }

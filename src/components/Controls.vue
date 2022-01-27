@@ -81,8 +81,7 @@ export default {
   min-width: 100vw;
   max-width: 100vw;
   width: 100vw;
-  min-height: 100px;
-  height:12vh;
+  height: 128px;
   box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
   display: flex;
   flex-direction: row;
@@ -111,7 +110,7 @@ export default {
 #cover-art {
   min-height: 100%;
   max-height: 100%;
-  height: 12vh;
+  height: 128px;
   background-color: #2c3e50;
 }
 .fas {
