@@ -2,7 +2,8 @@
   <div class="audio-controls">
     <div class="controls-left">
       <div class="song-details">
-        <img v-if="isPlaying" id="cover-art" :src="metadata.coverArt" alt="Now Playing" />
+        <img v-if="isPlaying && metadata.coverArt !== undefined" class="cover-art" :src="metadata.coverArt" alt="Now Playing" />
+        <img v-if="isPlaying && metadata.coverArt === undefined" class="cover-art" src="../assets/placeholder.png" alt="Now Playing" />
         <div v-if="isPlaying" class="text-details">
           <p class="song-title">{{metadata.title}}</p>
           <p class="song-details"><span v-on:click="goToArtist(metadata.artist)">{{metadata.artist}}</span>&nbsp;-&nbsp;<span v-on:click="goToAlbum(metadata.album, metadata.albumArtist)">{{metadata.album}}</span></p>
@@ -29,12 +30,11 @@
 <script>
 export default {
   name: "Controls",
-  props: ['metadata'],
+  props: ['metadata', 'isPlaying'],
   computed: {
   },
   data() {
     return {
-      isPlaying: false,
       coverArt: "../assets/placeholder.png",
     }
   },
@@ -42,12 +42,10 @@ export default {
     pause: function() {
       console.log("Paused");
       this.$emit('pause');
-      this.isPlaying = false;
     },
     play: function() {
       console.log("Playback resumed");
       this.$emit('play');
-      this.isPlaying = true;
     },
     back: function() {},
     next: function() {
@@ -107,7 +105,7 @@ export default {
 .controls-center {
   justify-content: center;
 }
-#cover-art {
+.cover-art {
   min-height: 100%;
   max-height: 100%;
   height: 128px;

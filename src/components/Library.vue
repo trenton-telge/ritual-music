@@ -1,9 +1,9 @@
 <template>
   <div class="library">
-    <div class="albums">
+    <div v-if="viewState === 'albums'" class="albums">
       <div v-for="(album) in albums" :key="album._id" class="album-card">
-        <img v-if="album.coverArt === undefined" v-on:click="playAlbum(album)" src="../assets/placeholder.png" />
-        <img v-else :src="album.coverArt" v-on:click="playAlbum(album)" :alt="album.title">
+        <img v-if="album.coverArt === undefined" v-on:click="expandAlbum(album)" src="../assets/placeholder.png" />
+        <img v-else :src="album.coverArt" v-on:click="expandAlbum(album)" :alt="album.title">
         <p>{{album.title}}</p>
         <p>{{album.albumArtist}}</p>
       </div>
@@ -14,11 +14,15 @@
 <script>
 export default {
   name: 'Library',
-  props: ['albums'],
+  props: ['albums', 'viewState'],
   methods: {
     playAlbum: function(album) {
       console.log(`Clicked play on album ${album.title} by ${album.albumArtist}`);
       this.$emit('play-album', album)
+    },
+    expandAlbum: function(album) {
+      console.log(`Expanding album ${album.title} by ${album.albumArtist}`);
+      this.$emit('expand-album', album)
     }
   }
 }
@@ -44,6 +48,8 @@ export default {
   width: 100%;
   justify-content: center;
   padding-bottom: 200px;
+  padding-left: calc(2vw + 30px);
+  padding-right: calc(2vw + 30px);
 }
 .album-card {
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);

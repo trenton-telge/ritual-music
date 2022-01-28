@@ -14,7 +14,7 @@ let datastore = Datastore.create({filename: './library.db', autoload: true});
 /** https://www.npmjs.com/package/node-id3 **/
 import NodeID3 from "node-id3";
 // const NodeID3 = require('node-id3');
-//import FLAC from 'flac-parser';
+import FLAC from 'flac-parser';
 // const FLAC = require('flac-parser');
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -113,6 +113,10 @@ electron.ipcMain.handle('add-album-to-front-of-playlist-and-play', (event, album
   addAlbumToPlaylistAndPlay(event, JSON.parse(album));
 })
 
+electron.ipcMain.handle('add-song-to-front-of-playlist-and-play', (event, song) => {
+  addSongToPlaylistAndPlay(event, JSON.parse(song));
+})
+
 electron.ipcMain.handle('scan-folder-and-add', async (event, path) => {
   new Promise(() => {
     console.log(path.filePaths);
@@ -127,6 +131,14 @@ electron.ipcMain.handle('scan-folder-and-add', async (event, path) => {
   }).then()
 })
 
+electron.ipcMain.handle('get-album-songs', (event, album) => {
+  getSongsByAlbum(JSON.parse(album)).then((res) => {
+    console.log(res);
+    const data = {album: album, songs: res};
+    event.sender.send('open-album-with-songs', data);
+  })
+})
+
 electron.ipcMain.handle('get-album-list', async (event) => {
   console.log("Getting album list...");
   getAllAlbums().then((res) => {
@@ -138,6 +150,8 @@ electron.ipcMain.handle('play-next-if-available', async (event) => {
   activePlaylist.shift();
   if (activePlaylist.length > 0) {
     playInApp(event, activePlaylist[0]);
+  } else {
+    event.sender.send('end-of-playlist');
   }
 })
 
@@ -146,6 +160,11 @@ function addAlbumToPlaylistAndPlay(event, album) {
     activePlaylist = res.concat(activePlaylist);
     playInApp(event, activePlaylist[0]);
   })
+}
+
+function addSongToPlaylistAndPlay(event, song) {
+  activePlaylist = Array.of(song).concat(activePlaylist);
+  playInApp(event, activePlaylist[0]);
 }
 
 function playInApp(event, song) {
@@ -194,7 +213,10 @@ function getAllAlbums() {
 
 function getSongsByAlbum(album){
   return new Promise((resolve => {
-    datastore.find({type: "song", album: album.title, albumArtist: album.albumArtist}).then((res) => {resolve(res.sort((a, b) => (a.trackNumber > b.trackNumber) ? 1 : -1));})
+    datastore.find({type: "song", album: album.title, albumArtist: album.albumArtist}).then((res) => {
+      console.log(res)
+      resolve(res.sort((a, b) => (a.trackNumber > b.trackNumber) ? 1 : -1));
+    })
   }))
 }
 
@@ -226,6 +248,9 @@ function addFile(path) {
         if (songObject.trackNumber.includes('/')) {
           songObject.trackNumber = parseInt(songObject.trackNumber.substr(0, songObject.trackNumber.indexOf('/')));
         }
+        else {
+          songObject.trackNumber = parseInt(songObject.trackNumber);
+        }
       }
       datastore.find({type: "song", title: songObject.title, artist: songObject.artist, album: songObject.album}).then((res) => {
         if (res.length > 0) {
@@ -248,6 +273,40 @@ function addFile(path) {
     if (path.toLowerCase().endsWith(".flac")) {
       isMusicFile = true;
       mime = "audio/flac";
+      let tags = [], songObject;
+      new Promise((resolve) => {
+        let stream = fs.createReadStream(path).pipe(new FLAC());
+        stream.on('data', function(tag){
+          tags.push(tag);
+        })
+        stream.on('finish', function (){
+          resolve();
+        })
+      }).then(function(){
+        songObject = new Song(findTagInArray('title', tags), path, findTagInArray('artist', tags), findTagInArray('album', tags), findTagInArray('artist', tags), undefined,findTagInArray('tracknumber', tags), mime)
+        if (songObject.trackNumber !== undefined) {
+          if (songObject.trackNumber.includes('/')) {
+            songObject.trackNumber = parseInt(songObject.trackNumber.substr(0, songObject.trackNumber.indexOf('/')));
+          }
+          else {
+            songObject.trackNumber = parseInt(songObject.trackNumber);
+          }
+        }
+        datastore.find({type: "song", title: songObject.title, artist: songObject.artist, album: songObject.album}).then((res) => {
+          if (res.length > 0) {
+            console.log("Song exists.")
+            resolve();
+          } else {
+            datastore.insert(songObject).then(() => {
+              console.log(`Inserted (${songObject.title}) by (${songObject.artist}) on (${songObject.album})`);
+              addAlbumIfNotExists(new Album(songObject.album, songObject.albumArtist, undefined)).then(() => {
+                resolve();
+              })
+            })
+          }
+        })
+        console.log(songObject)
+      })
     }
     if (path.toLowerCase().endsWith(".wav")) {
       isMusicFile = true;
@@ -264,6 +323,17 @@ function addFile(path) {
   })
 }
 
+function findTagInArray(name, array) {
+  let i = 0;
+  while (i < array.length) {
+    if (array[i].type === name) {
+      return array[i].value;
+    }
+    i++;
+  }
+  return undefined;
+}
+
 function addAlbumIfNotExists(album) {
   return new Promise((resolve) => {
     datastore.find({type: "album", title: album.title, albumArtist: album.albumArtist}).then((res) => {
@@ -274,6 +344,7 @@ function addAlbumIfNotExists(album) {
         datastore.insert((album)).then(() => {
           console.log(`Inserted album (${album.title}) by (${album.albumArtist})`)
           getAllAlbums().then((res) => {
+            setAlbumColorScheme(album);
             win.webContents.send('refresh-albums', res);
             resolve();
           })
@@ -281,4 +352,10 @@ function addAlbumIfNotExists(album) {
       }
     })
   })
+}
+
+function setAlbumColorScheme(album) {
+  if (album.coverArt !== undefined) {
+
+  }
 }

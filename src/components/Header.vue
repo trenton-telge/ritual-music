@@ -1,7 +1,7 @@
 <template>
   <div class="header-wrapper">
     <div class="header-group-left">
-      <i class="fas fa-bars"></i>
+      <i class="fas fa-bars" v-on:click="back"></i>
     </div>
     <div class="header-group-center">
       <input type="text" class="search-bar" placeholder="Search">
@@ -19,6 +19,9 @@ export default {
   methods: {
     addFiles: function () {
       this.$emit('addfiles');
+    },
+    back: function() {
+      this.$emit('back');
     }
   }
 }
